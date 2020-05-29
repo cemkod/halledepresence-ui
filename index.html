@@ -1,0 +1,125 @@
+<html>
+<body>
+
+
+
+<script
+  src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+  integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="
+  crossorigin="anonymous"></script>
+
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-database.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha1/0.6.0/sha1.min.js"></script>
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyD3x5GZ5QDMxRQEw3m1X596tER9YAf2Wzk",
+    authDomain: "telepresencekit.firebaseapp.com",
+    databaseURL: "https://telepresencekit.firebaseio.com",
+    projectId: "telepresencekit",
+    storageBucket: "telepresencekit.appspot.com",
+    messagingSenderId: "621723742883",
+    appId: "1:621723742883:web:8756633f01962f8350c516"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+database = firebase.database();
+lastkey = null;
+
+function transmit(msg) {
+  pin = $("#pin").val();
+  if (isNaN(msg)) return;
+  time = new Date().getTime();
+  hash = sha1(msg.toString()+time+pin);
+  console.log(msg.toString()+time+pin);
+  //console.log(hash);
+  data = JSON.stringify({ msg: msg, time: time, hash: hash});
+  //console.log(data);
+  database.ref('control').set(data);
+}
+
+$(window).keydown(function(event) {
+  if (event.keyCode == lastkey) return;
+  switch (event.keyCode) {
+    case 87: //w
+    case 38: //up
+      transmit(3);
+      break;
+    case 65: //a
+    case 37: //left
+      transmit(2);
+      break;
+    case 83: //s
+    case 40: //down
+      transmit(4);
+      break;
+    case 68: //d
+    case 39: //right
+      transmit(1);
+      break;
+    case 27: //Escape
+      transmit(5);
+      break;
+    default:
+      return;
+  } 
+  lastkey = event.keyCode;
+});
+
+$(window).keyup(function(event) {
+  switch (event.keyCode) {
+    case 87: //w
+    case 38: //up
+    case 65: //a
+    case 37: //left
+    case 83: //s
+    case 40: //down
+    case 68: //d
+    case 39: //right
+    case 27: //Escape
+    transmit(0);
+    lastkey = null;
+  } 
+});
+
+</script>
+
+<style>
+body {
+	/*background-color: #000000;*/
+	text-align: center;
+	margin-top: 50px;
+}
+#out {
+	display: inline-block;
+	width: 50px;
+	height: 50px;
+	background-color: #000000;
+	margin-top: 20px;
+}
+
+</style>
+
+<pre>
+  Keyboard controls:
+  W,A,S,D or Cursors
+  Esc to fire
+</pre>
+
+PIN: <input id="pin" value="000000" size=6 maxlength=6>
+
+<button id="up" onMouseDown="transmit(3);" onMouseUp="transmit(0);">^</button>
+<button id="left" onMouseDown="transmit(2);" onMouseUp="transmit(0);">&lt;</button>
+<button id="right" onMouseDown="transmit(1);" onMouseUp="transmit(0);">&gt;</button>
+<button id="down" onMouseDown="transmit(4);" onMouseUp="transmit(0);">v</button>
+&nbsp;
+<button id="fire" onMouseDown="transmit(5);" onMouseUp="transmit(0);">Annihilate</button>
+
+</body>
